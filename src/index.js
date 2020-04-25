@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, FlatList, Text, StyleSheet, StatusBar } from "react-native";
+import {
+  SafeAreaView,
+  FlatList,
+  Text,
+  StyleSheet,
+  StatusBar,
+  TouchableOpacity,
+} from "react-native";
 
 import api from "./services/api";
 
@@ -28,41 +35,71 @@ const App = () => {
     getProjects();
   }, []);
 
+  const handleAddProject = async () => {
+    try {
+      const response = await api.post("projects", {
+        title: `Novo projecto: ${Date.now()}`,
+        owner: `Luisito`,
+      });
+
+      const newProject = response.data;
+
+      setProjects([...projects, newProject]);
+    } catch (error) {
+      // console.error(error);
+    }
+  };
+
   return (
     <>
       <StatusBar barStyle="light-content" backgroundColor="#7159c1" />
-      <View style={styles.conatiner}>
-        <Text style={styles.title}>Sup Guys!</Text>
 
-        {projects.length > 0 &&
-          projects.map((project) => (
-            <Text style={styles.projectTitle} key={project.id}>
-              {project.title}
-            </Text>
-          ))}
-      </View>
+      <SafeAreaView style={styles.container}>
+        <FlatList
+          data={projects}
+          keyExtractor={(project) => project.id}
+          renderItem={({ item: project }) => (
+            <Text style={styles.projectTitle}>{project.title}</Text>
+          )}
+        />
+
+        <TouchableOpacity
+          activeOpacity={0.6}
+          style={styles.button}
+          onPress={handleAddProject}
+        >
+          <Text style={styles.buttonText}>Adicionar projeto</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
     </>
   );
 };
 
 const styles = StyleSheet.create({
-  conatiner: {
+  container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-
     backgroundColor: "#7159C1",
-  },
-
-  title: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
   },
 
   projectTitle: {
     color: "#fff",
-    fontSize: 15,
+    fontSize: 30,
+  },
+
+  button: {
+    justifyContent: "center",
+    alignItems: "center",
+
+    margin: 20,
+    height: 50,
+    borderRadius: 4,
+    backgroundColor: "#fff",
+  },
+
+  buttonText: {
+    fontWeight: "bold",
+    fontSize: 20,
+    color: "#7159c1",
   },
 });
 
